@@ -30,30 +30,29 @@ from docx.enum.text import WD_BREAK
 from docx import Document
 
 # Access API and get data in json format
-url = 'https://taco-1150.herokuapp.com/random/?full_taco=true'
-random_recipes_data = requests.get(url).json()
+# url = 'https://taco-1150.herokuapp.com/random/?full_taco=true'
+# random_recipes_data = requests.get(url).json()
 
 # print(random_recipes_data['mixin']['recipe'])
 
 # # 5 main ingredients needed
 ingredients = ['seasoning', 'condiment', 'mixin', 'base_layer', 'shell']
 
-
 # Get 5 main ingredients
-seasoning_name = random_recipes_data['seasoning']['name']
-seasoning_recipe = random_recipes_data['seasoning']['recipe']
-
-condiment_name = random_recipes_data['condiment']['name']
-condiment_recipe = random_recipes_data['condiment']['recipe']
-
-mixin_name = random_recipes_data['mixin']['name']
-mixin_recipe = random_recipes_data['mixin']['recipe']
-
-base_layer_name = random_recipes_data['base_layer']['name']
-base_layer_recipe = random_recipes_data['base_layer']['recipe']
-
-shell_name = random_recipes_data['shell']['name']
-shell_recipe = random_recipes_data['shell']['recipe']
+# seasoning_name = random_recipes_data['seasoning']['name']
+# seasoning_recipe = random_recipes_data['seasoning']['recipe']
+#
+# condiment_name = random_recipes_data['condiment']['name']
+# condiment_recipe = random_recipes_data['condiment']['recipe']
+#
+# mixin_name = random_recipes_data['mixin']['name']
+# mixin_recipe = random_recipes_data['mixin']['recipe']
+#
+# base_layer_name = random_recipes_data['base_layer']['name']
+# base_layer_recipe = random_recipes_data['base_layer']['recipe']
+#
+# shell_name = random_recipes_data['shell']['name']
+# shell_recipe = random_recipes_data['shell']['recipe']
 
 # print(seasoning_name)
 # print(seasoning_recipe)
@@ -66,11 +65,22 @@ document_title = 'Random Taco Cookbook'
 document.add_paragraph(document_title.upper(), 'Title')
 document.paragraphs[0].runs[0].add_break(docx.enum.text.WD_BREAK.PAGE)
 
-for ingredient in ingredients:
-    ingredient_title = random_recipes_data[f'{ingredient}']['name']
-    document.add_heading(ingredient_title)
-    ingredient_recipe = random_recipes_data[f'{ingredient}']['recipe']
-    document.add_paragraph(ingredient_recipe)
-document.add_page_break()
+
+def create_recipe(url):
+    random_recipes_data = requests.get(url).json()
+    for ingredient in ingredients:
+        ingredient_title = random_recipes_data[f'{ingredient}']['name']
+        document.add_heading(ingredient_title)
+        ingredient_recipe = random_recipes_data[f'{ingredient}']['recipe']
+        document.add_paragraph(ingredient_recipe)
+
+
+for i in range(3):
+    create_recipe('https://taco-1150.herokuapp.com/random/?full_taco=true')
+    if i != 2:
+        document.add_page_break()
+    else:
+        break
+
 
 document.save('Random_Taco_Recipes.docx')
