@@ -13,21 +13,17 @@
 """
 
 # Pending Tasks:
-# - access api and confirm the whole data is accessible by parsed in json format
-# - get 5 main ingredients with their recipes
-# - create a dictionary to save the whole recipe
+# - include workbook title, taco image (pending download it and resizing it or getting it by Unsplash API) and credits
 # - create the taco recipe name based on the 5 main ingredients
-# - create workbook
-# - include workbook title, taco image (pending download it and resizing it or getting it by Unsplash API)
-# - create a function that calls the API 3 times to get 3 recipes - each time save it in the dictionary and add it to
-# the workbook
 # - style the whole workbook
 # save the document
 
 import requests
 import docx
 from docx.enum.text import WD_BREAK
-from docx import Document
+from PIL import Image, ImageDraw, ImageFont
+import urllib.request
+from docx.shared import Inches
 
 # Access API and get data in json format
 # url = 'https://taco-1150.herokuapp.com/random/?full_taco=true'
@@ -57,13 +53,62 @@ ingredients = ['seasoning', 'condiment', 'mixin', 'base_layer', 'shell']
 # print(seasoning_name)
 # print(seasoning_recipe)
 
+# Getting image Full Size from Unsplash API
+image_data = 'https://api.unsplash.com/photos/random/?query=taco&client_id=gaTnMGbcg9XXErAUo-mdQeXYnAd-KaQO6jZqOvw_Klw&'
+random_image = requests.get(image_data).json()
+random_image_url = random_image['urls']['full']
+# Save full size image into project folder
+urllib.request.urlretrieve(random_image_url, 'random_taco.png')
+
+# Resizing Image with Unsplash API
+resized_image = random_image_url + '&w=600&dpr=2'
+# Save resized image into project folder
+urllib.request.urlretrieve(resized_image, 'random_taco_600x600.png')
+
+"""
+    Another method to resized image manually is shown below
+    I decided to go with the Unsplash API method above just because is faster, requires less code and
+    final result has same great quality but both methods have been tested.
+"""
+# # Resizing image manually
+# image = Image.open('random_taco.png')
+# # RESIZING IMAGE
+# # Getting original width and height
+# width = image.width
+# height = image.height
+# print(width, height)
+# percentage_to_reduce = float((800 * 100) / width)
+# print(percentage_to_reduce)
+#
+# height_resize = int(height * (percentage_to_reduce/100))
+# # width will be reduced by 14% too to keep contrast
+# width_resize = int(width * (percentage_to_reduce/100))
+#
+# # Resize image keeping contrast
+# resized_image_manually = image.resize((width_resize, height_resize))
+# # print(image_resized.width, image_resized.height)
+# resized_image_manually.show()
+# # Save changes over image and include new width and height on file name with png format for better quality
+# resized_image_manually.save(f'random_taco_{width_resize}x{height_resize}_manually.png')
 
 # Create Workbook
 document = docx.Document()
 
+# First Page includes Title, Image and Credits
+# Title
 document_title = 'Random Taco Cookbook'
 document.add_paragraph(document_title.upper(), 'Title')
-document.paragraphs[0].runs[0].add_break(docx.enum.text.WD_BREAK.PAGE)
+
+# Including image in Workbook
+document.add_picture('random_taco_600x600.png', width=Inches(6.25))
+
+# Add Credits
+
+document.add_page_break()
+
+
+# Add a Page break to start with recipes on second page
+# document.paragraphs[0].runs[0].add_break(docx.enum.text.WD_BREAK.PAGE)
 
 
 def create_recipe(url):
