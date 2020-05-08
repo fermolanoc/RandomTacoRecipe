@@ -12,10 +12,6 @@
     taco recipes each time it is ran.
 """
 
-# Pending Tasks:
-# - create the taco recipe name based on the 5 main ingredients
-# - style the whole workbook
-# save the document
 import os
 import requests
 import docx
@@ -24,32 +20,12 @@ from PIL import Image, ImageDraw, ImageFont
 import urllib.request
 from docx.shared import Inches
 
-# Access API and get data in json format
-# url = 'https://taco-1150.herokuapp.com/random/?full_taco=true'
-# random_recipes_data = requests.get(url).json()
-
-# print(random_recipes_data['mixin']['recipe'])
-
-# # 5 main ingredients needed
-ingredients = ['seasoning', 'condiment', 'mixin', 'base_layer', 'shell']
-
-# Get 5 main ingredients example
-# seasoning_name = random_recipes_data['seasoning']['name']
-# seasoning_recipe = random_recipes_data['seasoning']['recipe']
-#
-# condiment_name = random_recipes_data['condiment']['name']
-# condiment_recipe = random_recipes_data['condiment']['recipe']
-
-# print(seasoning_name)
-# print(seasoning_recipe)
-
 
 # Getting image Full Size from Unsplash API
-# Developer Credentials
 # Unsplash API to get images
 api_url = 'https://api.unsplash.com/photos/random/'
 
-# Access key
+# Developer Credentials - Access key
 key = os.environ.get('IMAGE_KEY')
 
 # Params to parse on the search
@@ -68,8 +44,6 @@ urllib.request.urlretrieve(random_image_url, 'random_taco.png')
 # image density varies depending on the user's device so highest quality always will be shown depending on which quality
 # level user's device can support -> min value is 1, max is 8 (3 is good enough and doesn't consume much bandwidth)
 resized_image = random_image_url + '&w=600&dpr=3'
-# Save resized image into project folder
-urllib.request.urlretrieve(resized_image, 'random_taco_600x600.png')
 
 """
     Another method to resized image manually is shown below
@@ -97,7 +71,35 @@ urllib.request.urlretrieve(resized_image, 'random_taco_600x600.png')
 # # Save changes over image and include new width and height on file name with png format for better quality
 # resized_image_manually.save(f'random_taco_{width_resize}x{height_resize}_manually.png')
 
-# Create Workbook
+# Save resized image into project folder
+urllib.request.urlretrieve(resized_image, 'random_taco_600x600.png')
+
+# DRAWING OVER IMAGE
+# Open resized image
+image = Image.open('random_taco_600x600.png')
+
+# getting image size
+height = image.height
+W, H = (576, height)
+
+# message to be printed over image
+message = 'Random Taco Cookbook'
+
+image_draw = ImageDraw.Draw(image)
+# Write over image - font type and size
+font = ImageFont.truetype('arial.ttf', 85)
+
+# getting width and height of the message text
+text_width, text_height = image_draw.textsize(message)
+# text + coordinates (center, center) where text will be placed + style
+# W-w and H-h -> image width and height minus text width and height so text will be centered
+image_draw.text(((W-text_width)/2, (H-text_height)/2), message, fill='yellow', font=font)
+
+# Save edited image into project folder
+image.save('random_taco_600x600_with_text.png')
+
+
+# CREATE WORKBOOK
 document = docx.Document()
 
 # First Page includes Title, Image and Credits
@@ -106,7 +108,7 @@ document_title = 'Random Taco Cookbook'
 document.add_paragraph(document_title.upper(), 'Title')
 
 # Including image in Workbook
-document.add_picture('random_taco_600x600.png', height=docx.shared.Inches(6.25))
+document.add_picture('random_taco_600x600_with_text.png', height=docx.shared.Inches(6.25))
 
 # Add Credits
 # Heading
@@ -127,23 +129,52 @@ document.add_page_break()
 paragraph = document.add_paragraph()
 
 
+# PASSING DATA TO WORKBOOK
+# 5 main ingredients needed
+ingredients = ['seasoning', 'condiment', 'mixin', 'base_layer', 'shell']
+
+# Get 5 main ingredients example
+# seasoning_name = random_recipes_data['seasoning']['name']
+# seasoning_recipe = random_recipes_data['seasoning']['recipe']
+
+# condiment_name = random_recipes_data['condiment']['name']
+# condiment_recipe = random_recipes_data['condiment']['recipe']
+
+# print(seasoning_name)
+# print(seasoning_recipe)
+
+ingredients_list = []
+
+
+def create_title():
+    paragraph.insert_paragraph_before(ingredients_list[0] + ' with ' + ingredients_list[1] + ', '
+                                                        + ingredients_list[2] + ' and'
+                                                        + ingredients_list[3] + ' in ' + ingredients_list[4], 'Title')
+
+
 def create_recipe(url):
     random_recipes_data = requests.get(url).json()
-    custom_recipe_title = ''
     for ingredient in ingredients:
         ingredient_title = random_recipes_data[f'{ingredient}']['name']
         document.add_heading(ingredient_title)
         ingredient_recipe = random_recipes_data[f'{ingredient}']['recipe']
         document.add_paragraph(ingredient_recipe)
-        custom_recipe_title = custom_recipe_title + ingredient
-    prior_paragraph = paragraph.insert_paragraph_before(custom_recipe_title)
+        ingredients_list.append(ingredient_title)
+    paragraph.insert_paragraph_before(create_title())
+    # create_title()
 
+
+# def get_ingredients
 
 for i in range(3):
     create_recipe('https://taco-1150.herokuapp.com/random/?full_taco=true')
+    # paragraph.insert_paragraph_before(create_title())
+    ingredients_list = []
     if i != 2:
         document.add_page_break()
     else:
         break
 
 document.save('Random_Taco_Recipes.docx')
+
+
