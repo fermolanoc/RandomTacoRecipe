@@ -15,7 +15,6 @@
 import os
 import requests
 import docx
-from docx.enum.text import WD_BREAK
 from PIL import Image, ImageDraw, ImageFont
 import urllib.request
 from docx.shared import Inches
@@ -90,7 +89,7 @@ font = ImageFont.truetype('arial.ttf', 85)
 
 # getting width and height of the message text
 text_width, text_height = image_draw.textsize(message)
-# text + coordinates (center, center) where text will be placed + style
+# text + coordinates where text will be placed + style
 # W-w and H-h -> image width and height minus text width and height so text will be centered
 image_draw.text(((W - text_width) / 2, (H - text_height) / 2), message, fill='yellow', font=font)
 
@@ -121,6 +120,8 @@ credit_p(f'Taco image: Photo by {photo_author} on Unsplash', style='List Bullet'
 # Random Taco Recipes's API URL
 recipes_url = 'https://taco-1150.herokuapp.com/random/?full_taco=true'
 credit_p(f'Tacos from: {recipes_url}', style='List Bullet')
+
+# Code Author
 credit_p('Code by: Fernando Molano', style='List Bullet')
 
 document.add_page_break()
@@ -130,35 +131,54 @@ paragraph = document.add_paragraph()
 # 5 main ingredients needed
 ingredients = ['seasoning', 'condiment', 'mixin', 'base_layer', 'shell']
 
+# empty list to store ingredients names, this will be used to create a custom title for each recipe
 ingredients_list = []
 
 
+# function that gets ingredients names, and their recipes based on url given when function is called
 def create_recipe(url):
+    # Get data in JSON format
     random_recipes_data = requests.get(url).json()
+    # for each ingredient of the list above
     for ingredient in ingredients:
+        # get ingredient name and save it into the ingredients_list
         ingredient_title = random_recipes_data[f'{ingredient}']['name']
         ingredients_list.append(ingredient_title)
+    # call create_title function to create a custom title for the recipe
     create_title()
+    # once custom title has been created and added to the workbook
+    # for each ingredient in the list
     for ingredient in ingredients:
+        # get recipe name and detail
         ingredient_recipe_name = random_recipes_data[f'{ingredient}']['name']
         ingredient_recipe = random_recipes_data[f'{ingredient}']['recipe']
+        # print recipe name and detail on workbook
         document.add_heading(ingredient_recipe_name)
         document.add_paragraph(ingredient_recipe)
 
 
+# function to create a custom title for the recipe using the ingredients names and adding some prepositions
+# to create a nice sentence
 def create_title():
+    # get each item into the ingredients_list and add it to the sentence, at the end specify the text style = Title
     document.add_paragraph(ingredients_list[0] + ' with ' + ingredients_list[1] + ', '
                            + ingredients_list[2] + ' and '
                            + ingredients_list[3] + ' in ' + ingredients_list[4],
                            'Title')
 
 
+# Code will be run 3 times
 for i in range(3):
+    # each time it'll call create_recipe function and send the url where Tacos Recipes data is stored
     create_recipe('https://taco-1150.herokuapp.com/random/?full_taco=true')
+    # empty the list that was used to store ingredients names to create custom recipe's title so it can be use again
     ingredients_list = []
+    # first 2 recipes add a page break after them so next recipe start in a new page
     if i != 2:
         document.add_page_break()
+    # if it's the 3rd recipe just end the code so no blank page is added at the end
     else:
         break
 
+# save the workbook as a .docx file into the project folder to save all the data that was added to it
 document.save('Random_Taco_Recipes.docx')
