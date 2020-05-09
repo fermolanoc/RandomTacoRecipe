@@ -91,7 +91,8 @@ font = ImageFont.truetype('arial.ttf', 85)
 text_width, text_height = image_draw.textsize(message)
 # text + coordinates where text will be placed + style
 # W-w and H-h -> image width and height minus text width and height so text will be centered
-image_draw.text(((W - text_width) / 2, (H - text_height) / 2), message, fill='yellow', font=font)
+image_draw.text(((W - text_width) / 2, (H - text_height) / 2), message, fill='purple', font=font)
+image_draw.text(((W - text_width) / 2 + 5, (H - text_height) / 2 + 5), message, fill='yellow', font=font)
 
 # Save edited image into project folder
 image.save('random_taco_600x600_with_text.png')
