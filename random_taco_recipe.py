@@ -20,7 +20,6 @@ from PIL import Image, ImageDraw, ImageFont
 import urllib.request
 from docx.shared import Inches
 
-
 # Getting image Full Size from Unsplash API
 # Unsplash API to get images
 api_url = 'https://api.unsplash.com/photos/random/'
@@ -93,11 +92,10 @@ font = ImageFont.truetype('arial.ttf', 85)
 text_width, text_height = image_draw.textsize(message)
 # text + coordinates (center, center) where text will be placed + style
 # W-w and H-h -> image width and height minus text width and height so text will be centered
-image_draw.text(((W-text_width)/2, (H-text_height)/2), message, fill='yellow', font=font)
+image_draw.text(((W - text_width) / 2, (H - text_height) / 2), message, fill='yellow', font=font)
 
 # Save edited image into project folder
 image.save('random_taco_600x600_with_text.png')
-
 
 # CREATE WORKBOOK
 document = docx.Document()
@@ -128,47 +126,35 @@ credit_p('Code by: Fernando Molano', style='List Bullet')
 document.add_page_break()
 paragraph = document.add_paragraph()
 
-
 # PASSING DATA TO WORKBOOK
 # 5 main ingredients needed
 ingredients = ['seasoning', 'condiment', 'mixin', 'base_layer', 'shell']
 
-# Get 5 main ingredients example
-# seasoning_name = random_recipes_data['seasoning']['name']
-# seasoning_recipe = random_recipes_data['seasoning']['recipe']
-
-# condiment_name = random_recipes_data['condiment']['name']
-# condiment_recipe = random_recipes_data['condiment']['recipe']
-
-# print(seasoning_name)
-# print(seasoning_recipe)
-
 ingredients_list = []
-
-
-def create_title():
-    paragraph.insert_paragraph_before(ingredients_list[0] + ' with ' + ingredients_list[1] + ', '
-                                                        + ingredients_list[2] + ' and'
-                                                        + ingredients_list[3] + ' in ' + ingredients_list[4], 'Title')
 
 
 def create_recipe(url):
     random_recipes_data = requests.get(url).json()
     for ingredient in ingredients:
         ingredient_title = random_recipes_data[f'{ingredient}']['name']
-        document.add_heading(ingredient_title)
-        ingredient_recipe = random_recipes_data[f'{ingredient}']['recipe']
-        document.add_paragraph(ingredient_recipe)
         ingredients_list.append(ingredient_title)
-    paragraph.insert_paragraph_before(create_title())
-    # create_title()
+    create_title()
+    for ingredient in ingredients:
+        ingredient_recipe_name = random_recipes_data[f'{ingredient}']['name']
+        ingredient_recipe = random_recipes_data[f'{ingredient}']['recipe']
+        document.add_heading(ingredient_recipe_name)
+        document.add_paragraph(ingredient_recipe)
 
 
-# def get_ingredients
+def create_title():
+    document.add_paragraph(ingredients_list[0] + ' with ' + ingredients_list[1] + ', '
+                           + ingredients_list[2] + ' and '
+                           + ingredients_list[3] + ' in ' + ingredients_list[4],
+                           'Title')
+
 
 for i in range(3):
     create_recipe('https://taco-1150.herokuapp.com/random/?full_taco=true')
-    # paragraph.insert_paragraph_before(create_title())
     ingredients_list = []
     if i != 2:
         document.add_page_break()
@@ -176,5 +162,3 @@ for i in range(3):
         break
 
 document.save('Random_Taco_Recipes.docx')
-
-
