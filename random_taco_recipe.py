@@ -24,6 +24,8 @@ from docx.shared import Inches
 api_url = 'https://api.unsplash.com/photos/random/'
 
 # Developer Credentials - Access key
+# In order for you to be able to run this code you should include your own Unsplash Access Key
+# into your Environment variables
 key = os.environ.get('IMAGE_KEY')
 
 # Params to parse on the search
